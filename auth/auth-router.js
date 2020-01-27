@@ -1,6 +1,9 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const Users = require("../users/users-model.js");
+const uuid = require("uuid");
+
+const activeSessions = [];
 
 router.post("/register", (req, res) => {
   const { username, password } = req.body;
@@ -27,6 +30,10 @@ router.post("/login", restricted, (req, res) => {
     .first()
     .then(user => {
       if (user && bcrypt.compareSync(password, user.password)) {
+        const sessionId = uuid();
+        activeSessions.push(sessionId);
+        res.cookie("sessionId", sessionId, { maxAge: 900000 });
+
         res.status(200).json({ message: `Welcome ${user.username}!` });
       } else {
         res.status(401).json({ message: "Invalid Credentials" });
@@ -88,5 +95,20 @@ function restricted(req, res, next) {
     res.status(400).json({ message: "No credentials Provided" });
   }
 }
+
+function protected(req, res, next) {
+  if (activeSessions.includes(req.cookies.sessionId)) {
+    next();
+  } else {
+    res
+      .status(401)
+      .json({
+        message:
+          "Your cookie is either not there or it contains no valid sessionId"
+      });
+  }
+}
+
+router.protected = protected;
 
 module.exports = router;
