@@ -11,3 +11,5 @@ router.get("/users", (req, res) => {
       res.status(500).json({ message: "Failed to retrieve users" });
     });
 });
+
+module.exports = router;
