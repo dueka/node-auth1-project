@@ -1,5 +1,4 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
 
 const apiRouter = require("./api-router.js");
 const configureMiddleware = require("./configure-middleware.js");
